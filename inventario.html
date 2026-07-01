@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario | Gestión de Inventario</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="main.js" defer></script>
+    <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/product.png">
+</head>
+<body id="inventario-body">
+    <nav class="navbar">
+        <div class="navbar-brand">Gestión de Inventario</div>
+        <div class="navbar-nav">
+            <a href="usuarios.html" class="btn btn-secondary">Volver a Usuarios</a>
+            <button id="btnLogout" class="btn btn-danger">Cerrar Sesión</button>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="card">
+            <h3 id="formProductTitle">Registrar Producto</h3>
+            <form id="productForm">
+                <input type="hidden" id="productId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productNombre">Nombre del Producto</label>
+                        <input type="text" id="productNombre" placeholder="Ej. Computadora" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productCantidad">Cantidad</label>
+                        <input type="number" id="productCantidad" placeholder="Ej. 10" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productPrecio">Precio</label>
+                        <input type="number" id="productPrecio" step="0.01" placeholder="Ej. 450.00" min="0" required>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" id="btnProductSubmit" class="btn btn-primary">Agregar Producto</button>
+                    <button type="button" id="btnCancelProductEdit" class="btn btn-secondary hidden">Cancelar</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card table-card">
+            <h3>Lista de Productos</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

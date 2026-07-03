@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Producción | Gestión de Producción ACME</title>
+
+    <link rel="stylesheet" href="styles.css">
+    <script src="main.js" defer></script>
+
+    <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/factory.png">
+</head>
+
+<body id="produccion-body">
+
+    <nav class="navbar">
+
+        <div class="navbar-brand">Gestión de Producción</div>
+
+        <div class="navbar-nav">
+
+            <a href="usuarios.html" class="btn btn-secondary">Volver a Usuarios</a>
+
+            <a href="produccion.html" class="btn btn-production">Production</a>
+
+            <button id="btnLogout" class="btn btn-danger">Cerrar Sesión</button>
+        </div>
+
+    </nav>
+
+
+
+    <div class="container">
+
+        <div class="card">
+
+            <h2 id="formProductionTitle">
+                Registrar Producción
+            </h2>
+
+            <form id="productionForm">
+
+                <input type="hidden" id="productionId">
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="productionCode">
+                            Código del Proceso
+                        </label>
+
+                        <input
+                            type="text"
+                            id="productionCode"
+                            readonly
+                            placeholder="Generado automáticamente">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="productSelect">
+                            Producto a Fabricar
+                        </label>
+
+                        <select id="productSelect" required>
+
+                            <option value="">
+                                Seleccione un producto
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="productionQuantity">
+                            Cantidad a Fabricar
+                        </label>
+
+                        <input
+                            type="number"
+                            id="productionQuantity"
+                            placeholder="Ej. 50"
+                            min="1"
+                            required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="productionDate">
+                            Fecha
+                        </label>
+
+                        <input
+                            type="date"
+                            id="productionDate"
+                            required>
+
+                    </div>
+
+                </div>
+
+                <div class="form-actions">
+
+                    <button
+                        type="submit"
+                        id="btnProductionSubmit"
+                        class="btn btn-success">
+
+                        Registrar Producción
+
+                    </button>
+
+                    <button
+                        type="reset"
+                        class="btn btn-secondary">
+
+                        Limpiar
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+
+        <div class="card">
+
+            <h2>
+                Resumen de Producción
+            </h2>
+
+            <div id="productionSummary">
+
+                <p>
+                    Aquí se mostrará el resumen del proceso realizado.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="card table-card">
+
+            <h2>
+                Historial de Producción
+            </h2>
+
+            <div class="table-responsive">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Código</th>
+
+                            <th>Producto</th>
+
+                            <th>Cantidad</th>
+
+                            <th>Fecha</th>
+
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productionTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

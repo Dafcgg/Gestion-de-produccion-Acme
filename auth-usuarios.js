@@ -304,29 +304,31 @@ function initUsuarios() {
 
     }
 
-    async function eliminarUsuario(id){
+async function eliminarUsuario(id){
 
-        if(!confirm("¿Desea eliminar este usuario?")) return;
+    if(!confirm("¿Desea eliminar este usuario?")) return;
 
-        try{
+    try{
 
-            await httpClient(`${URL_BASE}usuarios/${id}.json`,null,"DELETE");
+        await httpClient(`${URL_BASE}usuarios/${id}.json`, null, "DELETE");
 
-            if(document.getElementById("userId").value===id){
-                resetUserForm();
-            }
-
-            cargarUsuarios();
-
-            alert("Usuario eliminado correctamente.");
-
-        }catch(error){
-
-            console.error(error);
-
+        if(document.getElementById("userId").value === id){
+            resetUserForm();
         }
 
+        cargarUsuarios();
+
+        alert("Usuario eliminado correctamente.");
+
+    }catch(error){
+
+        console.error(error);
+
+        alert("Error al eliminar el usuario.");
+
     }
+
+}
 
     function resetUserForm(){
 
@@ -340,6 +342,26 @@ function initUsuarios() {
 
         btnCancelUserEdit.classList.add("hidden");
 
+        
+
     }
 
 }
+
+
+const btnLogout = document.getElementById("btnLogout");
+
+if (btnLogout) {
+
+    btnLogout.addEventListener("click", () => {
+
+        const salir = confirm("¿Desea cerrar sesión?");
+
+        if (salir) {
+            window.location.replace("login.html");
+        }
+
+    });
+
+}
+

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Recetas | Gestión de Producción ACME</title>
+
+    <link rel="stylesheet" href="css/styles.css">
+
+    <script src="receta.js" defer></script>
+
+    <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/ingredients.png">
+
+</head>
+
+<body id="receta-body">
+
+    <nav class="navbar">
+
+        <div class="navbar-brand">
+            Gestión de Recetas
+        </div>
+
+        <div class="navbar-nav">
+            <a href="usuarios.html" class="btn btn-secondary">
+                Usuarios
+            </a>
+            <a href="inventario.html" class="btn btn-secondary">
+                Inventario
+            </a>
+
+
+            <a href="produccion.html" class="btn btn-production">
+                Producción
+            </a>
+
+            <button id="btnLogout" class="btn btn-danger">
+                Cerrar Sesión
+            </button>
+
+        </div>
+
+    </nav>
+
+    <div class="container">
+
+        <div class="card">
+
+            <h3 id="formRecipeTitle">
+                Registrar Receta
+            </h3>
+
+            <form id="recipeForm">
+
+                <input type="hidden" id="recipeId">
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="recipeProduct">
+                            Producto Terminado
+                        </label>
+
+                        <select id="recipeProduct" required>
+
+                            <option value="">
+                                Seleccione un producto terminado
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <h4>Agregar Materias Primas</h4>
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="recipeMaterial">
+                            Materia Prima
+                        </label>
+
+                        <select id="recipeMaterial">
+
+                            <option value="">
+                                Seleccione una materia prima
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="recipeQuantity">
+                            Cantidad requerida
+                        </label>
+
+                        <input
+                            type="number"
+                            id="recipeQuantity"
+                            min="1"
+                            placeholder="Ej. 100">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>&nbsp;</label>
+
+                        <button
+                            type="button"
+                            id="btnAddMaterial"
+                            class="btn btn-success">
+
+                            Agregar
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="table-responsive">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Materia Prima</th>
+
+                                <th>Cantidad</th>
+
+                                <th>Acciones</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="recipeTableBody">
+
+                            <tr>
+
+                                <td colspan="3">
+                                    No hay materias primas agregadas.
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <div class="form-actions">
+
+                    <button
+                        type="submit"
+                        id="btnRecipeSubmit"
+                        class="btn btn-primary">
+
+                        Guardar Receta
+
+                    </button>
+
+                    <button
+                        type="button"
+                        id="btnCancelRecipe"
+                        class="btn btn-secondary hidden">
+
+                        Cancelar
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+        <div class="card table-card">
+
+            <h3>
+
+                Recetas Registradas
+
+            </h3>
+
+            <div class="table-responsive">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Producto Terminado</th>
+
+                            <th>Materias Primas</th>
+
+                            <th>Acciones</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="recipesTableBody">
+
+                        <tr>
+
+                            <td colspan="3">
+
+                                No hay recetas registradas.
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

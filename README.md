@@ -57,7 +57,9 @@ Desarrollar una aplicación web que permita gestionar de forma eficiente el proc
 ├── inventario.html
 ├── produccion.html
 │
-├── styles.css
+├── css/
+│   styles.css
+│
 ├── auth-usuarios.js
 ├── inventario.js
 │

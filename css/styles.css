@@ -812,3 +812,78 @@ tbody tr:hover{
     }
 
 }
+
+#receta-body{
+    min-height:100vh;
+    background:
+    linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),
+    url("https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=1920&q=80");
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+}
+
+.recipe-title{
+    color:#1e3a8a;
+    font-size:22px;
+    font-weight:700;
+    margin-bottom:20px;
+}
+
+.recipe-card{
+    background:rgba(255,255,255,.96);
+    border-radius:18px;
+    padding:30px;
+    box-shadow:0 15px 35px rgba(0,0,0,.12);
+    border:1px solid rgba(37,99,235,.10);
+}
+
+.recipe-card h4{
+    color:#1e3a8a;
+    margin:20px 0 15px;
+    font-size:18px;
+    font-weight:600;
+}
+
+#recipeTableBody td,
+#recipesTableBody td{
+    vertical-align:middle;
+}
+
+#recipeTableBody tr:hover,
+#recipesTableBody tr:hover{
+    background:#dbeafe;
+}
+
+#recipeMaterial,
+#recipeProduct,
+#recipeQuantity{
+    width:100%;
+}
+
+.recipe-actions{
+    display:flex;
+    gap:12px;
+    margin-top:20px;
+}
+
+.recipe-actions .btn{
+    flex:1;
+}
+
+#btnAddMaterial{
+    margin-top:30px;
+}
+
+@media(max-width:768px){
+
+    .recipe-actions{
+        flex-direction:column;
+    }
+
+    #btnAddMaterial{
+        width:100%;
+        margin-top:10px;
+    }
+
+}

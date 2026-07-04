@@ -234,7 +234,7 @@ function initProduccion() {
 
             const receta = await responseReceta.json();
 
-            if (!receta) {
+            if (!receta || !receta.materiales || receta.materiales.length === 0) {
                 showMsg("Este producto no tiene fórmula registrada.");
                 return;
             }
@@ -249,10 +249,12 @@ function initProduccion() {
 
             let stockSuficiente = true;
 
-            for (const materiaId in receta) {
+            for (const materia of receta.materiales) {
+
+                const materiaId = materia.id;
 
                 const cantidadNecesaria =
-                    receta[materiaId] * cantidadFabricar;
+                    materia.cantidad * cantidadFabricar;
 
                 if (
                     !inventario[materiaId] ||
@@ -274,10 +276,12 @@ function initProduccion() {
 
             }
 
-            for (const materiaId in receta) {
+            for (const materia of receta.materiales) {
+
+                const materiaId = materia.id;
 
                 const cantidadNecesaria =
-                    receta[materiaId] * cantidadFabricar;
+                    materia.cantidad * cantidadFabricar;
 
                 inventario[materiaId].cantidad -= cantidadNecesaria;
 
@@ -366,16 +370,16 @@ function initProduccion() {
                 <h5>Materia Prima Utilizada</h5>
             `;
 
-            for (const materia in receta) {
+            receta.materiales.forEach((materia) => {
 
                 productionSummary.innerHTML += `
                     <p>
-                        ${materia} :
-                        ${receta[materia] * cantidadFabricada}
+                        ${materia.nombre} :
+                        ${materia.cantidad * cantidadFabricada}
                     </p>
                 `;
 
-            }
+            });
 
             showMsg("Producción registrada correctamente.");
 

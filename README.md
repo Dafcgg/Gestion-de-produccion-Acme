@@ -52,6 +52,7 @@ Desarrollar una aplicación web que permita gestionar de forma eficiente el proc
 ```
 
 │
+├── index.html
 ├── login.html
 ├── usuarios.html
 ├── inventario.html
@@ -60,8 +61,11 @@ Desarrollar una aplicación web que permita gestionar de forma eficiente el proc
 ├── css/
 │   styles.css
 │
-├── auth-usuarios.js
-├── inventario.js
+├── js/
+│   auth-usuarios.js
+│   inventario.js
+│   produccion.js
+│   receta.js
 │
 ├── README.md
 

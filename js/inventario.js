@@ -308,23 +308,6 @@ function initInventario() {
 
     }
 
-    
-const btnLogout = document.getElementById("btnLogout");
-
-if (btnLogout) {
-
-    btnLogout.addEventListener("click", () => {
-
-        const salir = confirm("¿Desea cerrar sesión?");
-
-        if (salir) {
-            window.location.replace("login.html");
-        }
-
-    });
-
-}
-
 function showMsg(mensaje) {
 
     alert(mensaje);

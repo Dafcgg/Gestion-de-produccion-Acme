@@ -267,11 +267,11 @@ function initRecetas() {
 
                 await httpClient(
 
-                    `${URL_BASE}recetas.json`,
+                    `${URL_BASE}recetas/${idProducto}.json`,
 
                     receta,
 
-                    "POST"
+                    "PUT"
 
                 );
 
@@ -281,7 +281,7 @@ function initRecetas() {
 
                 await httpClient(
 
-                    `${URL_BASE}recetas/${id}.json`,
+                    `${URL_BASE}recetas/${idProducto}.json`,
 
                     receta,
 

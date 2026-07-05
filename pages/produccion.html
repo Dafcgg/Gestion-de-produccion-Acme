@@ -7,6 +7,9 @@
     <title>Producción | Gestión de Producción ACME</title>
 
     <link rel="stylesheet" href="../css/styles.css">
+    <script src="../js/api.js" defer></script>
+    <script src="../web-components/app-navbar.js" defer></script>
+    <script src="../web-components/app-search-box.js" defer></script>
     <script src="../js/produccion.js" defer></script>
 
     <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/factory.png">
@@ -14,27 +17,7 @@
 
 <body id="produccion-body">
 
-    <nav class="navbar">
-
-        <div class="navbar-brand">
-            Gestión de Producción
-        </div>
-
-        <div class="navbar-nav">
-            <a href="usuarios.html" class="btn btn-secondary">
-                Usuarios
-            </a>
-
-            <a href="inventario.html" class="btn btn-secondary">
-                Inventario
-            </a>
-            <a href="receta.html" class="btn btn-production">Receta</a>
-            <button id="btnLogout" class="btn btn-danger">
-                Cerrar Sesión
-            </button>
-        </div>
-
-    </nav>
+    <app-navbar brand="Gestión de Producción" active="produccion"></app-navbar>
 
     <div class="container">
 
@@ -175,14 +158,10 @@
                 Historial de Producción
             </h3>
 
-            <div class="search-box">
-
-                <input
-                    type="text"
-                    id="searchProduction"
-                    placeholder="Buscar producción...">
-
-            </div>
+            <app-search-box
+                placeholder="Buscar producción..."
+                target="productionTableBody">
+            </app-search-box>
 
             <div class="table-responsive">
 

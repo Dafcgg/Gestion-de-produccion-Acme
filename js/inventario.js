@@ -1,40 +1,7 @@
-const URL_BASE = "https://gestion-de-produccion---acme-default-rtdb.firebaseio.com/";
-
-async function httpClient(url, payload, method) {
-
-    const config = {
-        method,
-        headers: {
-            "Content-Type": "application/json"
-        }
-    };
-
-    if (payload !== null && method !== "GET" && method !== "DELETE") {
-        config.body = JSON.stringify(payload);
-    }
-
-    return await fetch(url, config);
-
-}
-
 document.addEventListener("DOMContentLoaded", () => {
 
     if (document.getElementById("productForm")) {
         initInventario();
-    }
-
-    const btnLogout = document.getElementById("btnLogout");
-
-    if (btnLogout) {
-
-        btnLogout.addEventListener("click", () => {
-
-            if (confirm("¿Desea cerrar sesión?")) {
-                window.location.href = "login.html";
-            }
-
-        });
-
     }
 
 });
@@ -46,13 +13,17 @@ function initInventario() {
     const btnCancelProductEdit = document.getElementById("btnCancelProductEdit");
     const formProductTitle = document.getElementById("formProductTitle");
     const btnProductSubmit = document.getElementById("btnProductSubmit");
+    const stockForm = document.getElementById("stockForm");
 
     cargarProductos();
 
     productForm.addEventListener("submit", guardarProducto);
 
     btnCancelProductEdit.addEventListener("click", resetProductForm);
-}
+
+    if (stockForm) {
+        stockForm.addEventListener("submit", aumentarStock);
+    }
     async function guardarProducto(e) {
 
         e.preventDefault();
@@ -308,8 +279,77 @@ function initInventario() {
 
     }
 
+    async function aumentarStock(e) {
+
+        e.preventDefault();
+
+        const codigo = document.getElementById("stockCodigo").value.trim();
+        const cantidadAumentar = Number(document.getElementById("stockCantidad").value);
+
+        if (!codigo || cantidadAumentar <= 0) {
+            showMsg("Ingrese un código y una cantidad válida.");
+            return;
+        }
+
+        try {
+
+            const response = await httpClient(
+                `${URL_BASE}productos.json`,
+                null,
+                "GET"
+            );
+
+            const productos = await response.json();
+
+            let idEncontrado = null;
+
+            if (productos) {
+
+                for (const key in productos) {
+
+                    if (productos[key].codigo.toLowerCase() === codigo.toLowerCase()) {
+                        idEncontrado = key;
+                        break;
+                    }
+
+                }
+
+            }
+
+            if (!idEncontrado) {
+                showMsg("No se encontró ningún producto con ese código.");
+                return;
+            }
+
+            const producto = productos[idEncontrado];
+
+            producto.cantidad += cantidadAumentar;
+
+            await httpClient(
+                `${URL_BASE}productos/${idEncontrado}.json`,
+                producto,
+                "PUT"
+            );
+
+            showMsg("Stock aumentado correctamente.");
+
+            stockForm.reset();
+
+            await cargarProductos();
+
+        } catch (error) {
+
+            console.error(error);
+            showMsg("Error al aumentar el stock.");
+
+        }
+
+    }
+
 function showMsg(mensaje) {
 
     alert(mensaje);
+
+}
 
 }

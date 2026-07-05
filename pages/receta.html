@@ -11,6 +11,8 @@
 
     <link rel="stylesheet" href="../css/styles.css">
 
+    <script src="../js/api.js" defer></script>
+    <script src="../web-components/app-navbar.js" defer></script>
     <script src="../js/receta.js" defer></script>
 
     <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/ingredients.png">
@@ -19,32 +21,7 @@
 
 <body id="receta-body">
 
-    <nav class="navbar">
-
-        <div class="navbar-brand">
-            Gestión de Recetas
-        </div>
-
-        <div class="navbar-nav">
-            <a href="usuarios.html" class="btn btn-secondary">
-                Usuarios
-            </a>
-            <a href="inventario.html" class="btn btn-secondary">
-                Inventario
-            </a>
-
-
-            <a href="produccion.html" class="btn btn-production">
-                Producción
-            </a>
-
-            <button id="btnLogout" class="btn btn-danger">
-                Cerrar Sesión
-            </button>
-
-        </div>
-
-    </nav>
+    <app-navbar brand="Gestión de Recetas" active="receta"></app-navbar>
 
     <div class="container">
 

@@ -1,40 +1,7 @@
-const URL_BASE = "https://gestion-de-produccion---acme-default-rtdb.firebaseio.com/";
-
-async function httpClient(url, payload, method) {
-
-    const config = {
-        method,
-        headers: {
-            "Content-Type": "application/json"
-        }
-    };
-
-    if (payload !== null && method !== "GET" && method !== "DELETE") {
-        config.body = JSON.stringify(payload);
-    }
-
-    return await fetch(url, config);
-
-}
-
 document.addEventListener("DOMContentLoaded", () => {
 
     if (document.getElementById("productionForm")) {
         initProduccion();
-    }
-
-    const btnLogout = document.getElementById("btnLogout");
-
-    if (btnLogout) {
-
-        btnLogout.addEventListener("click", () => {
-
-            if (confirm("¿Desea cerrar sesión?")) {
-                window.location.href = "login.html";
-            }
-
-        });
-
     }
 
 });
@@ -48,7 +15,6 @@ function initProduccion() {
     const productionTableBody = document.getElementById("productionTableBody");
     const formulaTableBody = document.getElementById("formulaTableBody");
     const productionSummary = document.getElementById("productionSummary");
-    const searchProduction = document.getElementById("searchProduction");
 
     cargarProductos();
     cargarHistorial();
@@ -60,7 +26,6 @@ function initProduccion() {
 
     productionForm.addEventListener("submit", fabricarProducto);
 
-    searchProduction.addEventListener("keyup", filtrarProducciones);}
 
     async function cargarProductos() {
 
@@ -503,27 +468,10 @@ function initProduccion() {
 
     }
 
-    function filtrarProducciones() {
-
-        const filtro = searchProduction.value.toLowerCase();
-
-        const filas = productionTableBody.querySelectorAll("tr");
-
-        filas.forEach((fila) => {
-
-            fila.style.display = fila.textContent
-                .toLowerCase()
-                .includes(filtro)
-                ? ""
-                : "none";
-
-        });
-
-    }
-
     function showMsg(mensaje) {
 
         alert(mensaje);
 
     }
 
+}

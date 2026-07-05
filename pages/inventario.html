@@ -6,6 +6,9 @@
     <title>Inventario | Gestión de Inventario</title>
 
     <link rel="stylesheet" href="../css/styles.css">
+    <script src="../js/api.js" defer></script>
+    <script src="../web-components/app-navbar.js" defer></script>
+    <script src="../web-components/app-search-box.js" defer></script>
     <script src="../js/inventario.js" defer></script>
 
     <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/product.png">
@@ -13,35 +16,7 @@
 
 <body id="inventario-body">
 
-    <nav class="navbar">
-
-        <div class="navbar-brand">
-            Gestión de Inventario
-        </div>
-
-        <div class="navbar-nav">
-
-            <a href="usuarios.html" class="btn btn-secondary">
-                Volver a Usuarios
-            </a>
-            <a href="receta.html" class="btn btn-production">Receta</a>
-            
-            <a href="produccion.html" class="btn btn-production">
-                Producción
-            </a>
-
-
-
-            <button
-                type="button"
-                id="btnLogout"
-                class="btn btn-danger">
-                Cerrar Sesión
-            </button>
-
-        </div>
-
-    </nav>
+    <app-navbar brand="Gestión de Inventario" active="inventario"></app-navbar>
 
     <div class="container">
 
@@ -152,11 +127,68 @@
 
         </div>
 
+        <div class="card">
+
+            <h3>
+                Aumentar Stock
+            </h3>
+
+            <form id="stockForm">
+
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <label for="stockCodigo">
+                            Código del Producto
+                        </label>
+
+                        <input
+                            type="text"
+                            id="stockCodigo"
+                            placeholder="Ej. MAT-001"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="stockCantidad">
+                            Cantidad a Aumentar
+                        </label>
+
+                        <input
+                            type="number"
+                            id="stockCantidad"
+                            placeholder="Ej. 50"
+                            min="1"
+                            required>
+                    </div>
+
+                </div>
+
+                <div class="form-actions">
+
+                    <button
+                        type="submit"
+                        id="btnStockSubmit"
+                        class="btn btn-success">
+                        Aumentar Stock
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
         <div class="card table-card">
 
             <h3>
                 Inventario de Productos
             </h3>
+
+            <app-search-box
+                placeholder="Buscar producto..."
+                target="productsTableBody">
+            </app-search-box>
 
             <div class="table-responsive">
 

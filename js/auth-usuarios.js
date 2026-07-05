@@ -1,27 +1,4 @@
 
-const URL_BASE = "https://gestion-de-produccion---acme-default-rtdb.firebaseio.com/";
-
-
-const httpClient = async (url, payload, method) => {
-
-    const config = {
-        method,
-        headers: {
-            "Content-Type": "application/json"
-        }
-    };
-
-    if (payload !== null && method !== "GET" && method !== "DELETE") {
-        config.body = JSON.stringify(payload);
-    }
-
-    const response = await fetch(url, config);
-    return response;
-
-};
-
-
-
 document.addEventListener("DOMContentLoaded", () => {
 
     if (document.getElementById("loginForm")) initLogin();
@@ -342,26 +319,6 @@ async function eliminarUsuario(id){
 
         btnCancelUserEdit.classList.add("hidden");
 
-        
-
     }
 
 }
-
-
-const btnLogout = document.getElementById("btnLogout");
-
-if (btnLogout) {
-
-    btnLogout.addEventListener("click", () => {
-
-        const salir = confirm("¿Desea cerrar sesión?");
-
-        if (salir) {
-            window.location.replace("login.html");
-        }
-
-    });
-
-}
-

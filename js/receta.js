@@ -1,40 +1,7 @@
-const URL_BASE = "https://gestion-de-produccion---acme-default-rtdb.firebaseio.com/";
-
-async function httpClient(url, payload, method) {
-
-    const config = {
-        method,
-        headers: {
-            "Content-Type": "application/json"
-        }
-    };
-
-    if (payload !== null && method !== "GET" && method !== "DELETE") {
-        config.body = JSON.stringify(payload);
-    }
-
-    return await fetch(url, config);
-
-}
-
 document.addEventListener("DOMContentLoaded", () => {
 
     if (document.getElementById("recipeForm")) {
         initRecetas();
-    }
-
-    const btnLogout = document.getElementById("btnLogout");
-
-    if (btnLogout) {
-
-        btnLogout.addEventListener("click", () => {
-
-            if (confirm("¿Desea cerrar sesión?")) {
-                window.location.href = "login.html";
-            }
-
-        });
-
     }
 
 });

@@ -23,8 +23,15 @@ function initRecetas() {
 
     let materiales = [];
 
-    cargarProductos();
-    cargarRecetas();
+    // Se cargan los productos primero y solo cuando terminan se cargan
+    // las recetas, para evitar que "Editar" intente seleccionar un producto
+    // en un <select> que todavía no tiene opciones (race condition).
+    iniciar();
+
+    async function iniciar() {
+        await cargarProductos();
+        await cargarRecetas();
+    }
 
     btnAddMaterial.addEventListener("click", agregarMaterial);
     recipeForm.addEventListener("submit", guardarReceta);
@@ -46,7 +53,7 @@ function initRecetas() {
 
             recipeProduct.innerHTML = `
                 <option value="">
-                    Seleccione un producto
+                    Seleccione un producto terminado
                 </option>
             `;
 
@@ -62,15 +69,27 @@ function initRecetas() {
 
                 const producto = productos[key];
 
-                const optionProducto = document.createElement("option");
-                optionProducto.value = key;
-                optionProducto.textContent = producto.nombre;
-                recipeProduct.appendChild(optionProducto);
+                // Solo los productos marcados como "producto_terminado"
+                // aparecen como producto a fabricar.
+                if (producto.tipo === "producto_terminado") {
 
-                const optionMaterial = document.createElement("option");
-                optionMaterial.value = key;
-                optionMaterial.textContent = producto.nombre;
-                recipeMaterial.appendChild(optionMaterial);
+                    const optionProducto = document.createElement("option");
+                    optionProducto.value = key;
+                    optionProducto.textContent = producto.nombre;
+                    recipeProduct.appendChild(optionProducto);
+
+                }
+
+                // Solo los productos marcados como "materia_prima"
+                // aparecen como materia prima seleccionable.
+                if (producto.tipo === "materia_prima") {
+
+                    const optionMaterial = document.createElement("option");
+                    optionMaterial.value = key;
+                    optionMaterial.textContent = producto.nombre;
+                    recipeMaterial.appendChild(optionMaterial);
+
+                }
 
             }
 
@@ -78,7 +97,7 @@ function initRecetas() {
 
             console.error(error);
 
-            showMsg("Error al cargar los productos.");
+            showMsg("Error al cargar los productos.", "error");
 
         }
 
@@ -91,18 +110,19 @@ function initRecetas() {
             recipeMaterial.selectedIndex
         ].text;
 
-        const cantidad = Number(recipeQuantity.value);
+        const cantidadInput = recipeQuantity.value;
+        const cantidad = Number(cantidadInput);
 
         if (idMaterial === "") {
 
-            showMsg("Seleccione una materia prima.");
+            showMsg("Seleccione una materia prima.", "warning");
             return;
 
         }
 
-        if (cantidad <= 0) {
+        if (cantidadInput === "" || !Number.isInteger(cantidad) || cantidad <= 0) {
 
-            showMsg("Ingrese una cantidad válida.");
+            showMsg("Ingrese una cantidad entera válida (mayor a 0).", "warning");
             return;
 
         }
@@ -113,7 +133,7 @@ function initRecetas() {
 
         if (existe) {
 
-            showMsg("Esta materia prima ya fue agregada.");
+            showMsg("Esta materia prima ya fue agregada.", "warning");
             return;
 
         }
@@ -202,7 +222,7 @@ function initRecetas() {
 
         if (idProducto === "") {
 
-            showMsg("Seleccione un producto.");
+            showMsg("Seleccione un producto.", "warning");
 
             return;
 
@@ -210,11 +230,13 @@ function initRecetas() {
 
         if (materiales.length === 0) {
 
-            showMsg("Debe agregar al menos una materia prima.");
+            showMsg("Debe agregar al menos una materia prima.", "warning");
 
             return;
 
         }
+
+        const restaurarBoton = setBtnLoading(btnRecipeSubmit, "Guardando...");
 
         try {
 
@@ -230,45 +252,39 @@ function initRecetas() {
 
             };
 
-            if (id === "") {
+            // La receta siempre se guarda usando el id del producto terminado
+            // como clave (recetas/{idProducto}), tanto al crear como al editar,
+            // así que no existe una diferencia real entre ambos casos.
+            await httpClient(
 
-                await httpClient(
+                `${URL_BASE}recetas/${idProducto}.json`,
 
-                    `${URL_BASE}recetas/${idProducto}.json`,
+                receta,
 
-                    receta,
+                "PUT"
 
-                    "PUT"
+            );
 
-                );
-
-                showMsg("Receta registrada correctamente.");
-
-            } else {
-
-                await httpClient(
-
-                    `${URL_BASE}recetas/${idProducto}.json`,
-
-                    receta,
-
-                    "PUT"
-
-                );
-
-                showMsg("Receta actualizada correctamente.");
-
-            }
+            showMsg(
+                id === ""
+                    ? "Receta registrada correctamente."
+                    : "Receta actualizada correctamente.",
+                "success"
+            );
 
             resetRecipeForm();
 
-            cargarRecetas();
+            await cargarRecetas();
 
         } catch (error) {
 
             console.error(error);
 
-            showMsg("Error al guardar la receta.");
+            showMsg("Error al guardar la receta.", "error");
+
+        } finally {
+
+            restaurarBoton();
 
         }
 
@@ -354,7 +370,7 @@ function initRecetas() {
 
             console.error(error);
 
-            showMsg("Error al cargar las recetas.");
+            showMsg("Error al cargar las recetas.", "error");
 
         }
 
@@ -376,6 +392,20 @@ function initRecetas() {
 
             recipeProduct.value = receta.productoId;
 
+            // Si el producto ya no existe en el select (fue eliminado o
+            // cambió de tipo desde Inventario), se avisa al usuario en
+            // lugar de dejarlo con un select vacío sin explicación.
+            if (recipeProduct.value !== receta.productoId) {
+
+                showMsg(
+                    "El producto original de esta receta ya no está disponible " +
+                    "como producto terminado (fue eliminado o cambió de tipo). " +
+                    "Seleccione uno nuevo antes de guardar.",
+                    "warning"
+                );
+
+            }
+
             materiales = receta.materiales || [];
 
             mostrarMateriales();
@@ -395,7 +425,7 @@ function initRecetas() {
 
             console.error(error);
 
-            showMsg("Error al cargar la receta.");
+            showMsg("Error al cargar la receta.", "error");
 
         }
 
@@ -413,15 +443,15 @@ function initRecetas() {
                 "DELETE"
             );
 
-            cargarRecetas();
+            await cargarRecetas();
 
-            showMsg("Receta eliminada correctamente.");
+            showMsg("Receta eliminada correctamente.", "success");
 
         } catch (error) {
 
             console.error(error);
 
-            showMsg("Error al eliminar la receta.");
+            showMsg("Error al eliminar la receta.", "error");
 
         }
 
@@ -445,9 +475,4 @@ function initRecetas() {
 
     }
 
-    function showMsg(mensaje) {
-
-        alert(mensaje);
-
-    }
 }

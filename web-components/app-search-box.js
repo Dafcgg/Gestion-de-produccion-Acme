@@ -1,4 +1,3 @@
-
 class AppSearchBox extends HTMLElement {
 
     connectedCallback() {

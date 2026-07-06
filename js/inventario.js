@@ -14,6 +14,7 @@ function initInventario() {
     const formProductTitle = document.getElementById("formProductTitle");
     const btnProductSubmit = document.getElementById("btnProductSubmit");
     const stockForm = document.getElementById("stockForm");
+    const btnStockSubmit = document.getElementById("btnStockSubmit");
 
     cargarProductos();
 
@@ -24,6 +25,17 @@ function initInventario() {
     if (stockForm) {
         stockForm.addEventListener("submit", aumentarStock);
     }
+
+    // Traduce el valor interno del tipo a una etiqueta legible para la tabla
+    function etiquetaTipo(tipo) {
+
+        if (tipo === "materia_prima") return "Materia Prima";
+        if (tipo === "producto_terminado") return "Producto Terminado";
+
+        return "Sin definir";
+
+    }
+
     async function guardarProducto(e) {
 
         e.preventDefault();
@@ -31,14 +43,34 @@ function initInventario() {
         const id = document.getElementById("productId").value;
         const codigo = document.getElementById("productCodigo").value.trim();
         const nombre = document.getElementById("productNombre").value.trim();
+        const tipo = document.getElementById("productTipo").value;
         const proveedor = document.getElementById("productProveedor").value.trim();
-        const cantidad = Number(document.getElementById("productCantidad").value);
-        const precio = Number(document.getElementById("productPrecio").value);
+        const cantidadInput = document.getElementById("productCantidad").value;
+        const precioInput = document.getElementById("productPrecio").value;
 
-        if (!codigo || !nombre || !proveedor || cantidad < 0 || precio < 0) {
-            showMsg("Complete correctamente todos los campos.");
+        const cantidad = Number(cantidadInput);
+        const precio = Number(precioInput);
+
+        if (!codigo || !nombre || !tipo || !proveedor || cantidadInput === "" || precioInput === "") {
+            showMsg("Complete correctamente todos los campos, incluyendo el tipo de producto.", "warning");
             return;
         }
+
+        // La cantidad debe ser un número entero mayor a 0 (no se acepta
+        // stock inicial en 0, ni fracciones de unidad).
+        if (!Number.isInteger(cantidad) || cantidad <= 0) {
+            showMsg("La cantidad debe ser un número entero mayor a 0.", "warning");
+            return;
+        }
+
+        // El precio debe ser mayor a 0. Un precio de $0 casi siempre es
+        // un error de captura, así que se avisa en vez de guardarlo silenciosamente.
+        if (!(precio > 0)) {
+            showMsg("El precio debe ser mayor a 0.", "warning");
+            return;
+        }
+
+        const restaurarBoton = setBtnLoading(btnProductSubmit, "Guardando...");
 
         try {
 
@@ -71,13 +103,40 @@ function initInventario() {
             }
 
             if (duplicado) {
-                showMsg("Ya existe un producto con ese código o nombre.");
+                showMsg("Ya existe un producto con ese código o nombre.", "warning");
+                restaurarBoton();
                 return;
+            }
+
+            // Si se está editando un producto ya existente y se le cambia
+            // el tipo (Materia Prima <-> Producto Terminado), se avisa si
+            // ese producto está siendo usado en alguna receta, ya que el
+            // cambio puede dejar recetas inconsistentes.
+            if (id !== "" && productos && productos[id] && productos[id].tipo !== tipo) {
+
+                const usoEnRecetas = await verificarUsoEnRecetas(id);
+
+                if (usoEnRecetas.enUso) {
+
+                    const continuar = confirm(
+                        `Este producto está usado en ${usoEnRecetas.detalle}. ` +
+                        `Cambiar su tipo puede dejar esas recetas inconsistentes. ` +
+                        `¿Desea continuar de todas formas?`
+                    );
+
+                    if (!continuar) {
+                        restaurarBoton();
+                        return;
+                    }
+
+                }
+
             }
 
             const producto = {
                 codigo,
                 nombre,
+                tipo,
                 proveedor,
                 cantidad,
                 precio
@@ -91,7 +150,7 @@ function initInventario() {
                     "POST"
                 );
 
-                showMsg("Producto agregado correctamente.");
+                showMsg("Producto agregado correctamente.", "success");
 
             } else {
 
@@ -101,7 +160,7 @@ function initInventario() {
                     "PUT"
                 );
 
-                showMsg("Producto actualizado correctamente.");
+                showMsg("Producto actualizado correctamente.", "success");
 
             }
 
@@ -111,7 +170,67 @@ function initInventario() {
         } catch (error) {
 
             console.error(error);
-            showMsg("Error al guardar el producto.");
+            showMsg("Error al guardar el producto.", "error");
+
+        } finally {
+
+            restaurarBoton();
+
+        }
+
+    }
+
+    // Revisa si un producto (por su id) está usado como producto terminado
+    // en alguna receta, o como materia prima dentro de los materiales de
+    // cualquier receta. Devuelve un resumen legible para mostrar al usuario.
+    async function verificarUsoEnRecetas(idProducto) {
+
+        try {
+
+            const response = await httpClient(
+                `${URL_BASE}recetas.json`,
+                null,
+                "GET"
+            );
+
+            const recetas = await response.json();
+
+            if (!recetas) {
+                return { enUso: false, detalle: "" };
+            }
+
+            const motivos = [];
+
+            for (const key in recetas) {
+
+                const receta = recetas[key];
+
+                if (receta.productoId === idProducto) {
+                    motivos.push(`la receta de "${receta.producto}" (como producto terminado)`);
+                    continue;
+                }
+
+                const usadoComoMateria = (receta.materiales || []).some(
+                    (materia) => materia.id === idProducto
+                );
+
+                if (usadoComoMateria) {
+                    motivos.push(`la receta de "${receta.producto}" (como materia prima)`);
+                }
+
+            }
+
+            return {
+                enUso: motivos.length > 0,
+                detalle: motivos.join(", ")
+            };
+
+        } catch (error) {
+
+            console.error(error);
+            // Si falla la verificación, se deja continuar sin bloquear al
+            // usuario, pero sin poder advertirle.
+            return { enUso: false, detalle: "" };
 
         }
 
@@ -120,7 +239,7 @@ function initInventario() {
         async function cargarProductos() {
 
         productsTableBody.innerHTML =
-            "<tr><td colspan='6'>Cargando productos...</td></tr>";
+            "<tr><td colspan='7'>Cargando productos...</td></tr>";
 
         try {
 
@@ -137,7 +256,7 @@ function initInventario() {
             if (!productos) {
 
                 productsTableBody.innerHTML =
-                    "<tr><td colspan='6'>No hay productos registrados.</td></tr>";
+                    "<tr><td colspan='7'>No hay productos registrados.</td></tr>";
 
                 return;
             }
@@ -151,6 +270,11 @@ function initInventario() {
                 fila.innerHTML = `
                     <td>${producto.codigo}</td>
                     <td>${producto.nombre}</td>
+                    <td>
+                        <span class="badge ${producto.tipo === 'materia_prima' ? 'badge-warning' : 'badge-success'}">
+                            ${etiquetaTipo(producto.tipo)}
+                        </span>
+                    </td>
                     <td>${producto.proveedor}</td>
                     <td>${producto.cantidad}</td>
                     <td>$${Number(producto.precio).toLocaleString("es-CO")}</td>
@@ -194,7 +318,7 @@ function initInventario() {
             console.error(error);
 
             productsTableBody.innerHTML =
-                "<tr><td colspan='6'>Error al cargar productos.</td></tr>";
+                "<tr><td colspan='7'>Error al cargar productos.</td></tr>";
 
         }
 
@@ -215,6 +339,7 @@ function initInventario() {
             document.getElementById("productId").value = id;
             document.getElementById("productCodigo").value = producto.codigo;
             document.getElementById("productNombre").value = producto.nombre;
+            document.getElementById("productTipo").value = producto.tipo || "";
             document.getElementById("productProveedor").value = producto.proveedor;
             document.getElementById("productCantidad").value = producto.cantidad;
             document.getElementById("productPrecio").value = producto.precio;
@@ -231,7 +356,7 @@ function initInventario() {
         } catch (error) {
 
             console.error(error);
-            showMsg("Error al cargar el producto.");
+            showMsg("Error al cargar el producto.", "error");
 
         }
 
@@ -239,7 +364,25 @@ function initInventario() {
 
     async function eliminarProducto(id) {
 
-        if (!confirm("¿Desea eliminar este producto?")) return;
+        // Antes de eliminar, se verifica si el producto está usado en
+        // alguna receta (como producto terminado o como materia prima).
+        // Si lo está, se advierte al usuario en vez de eliminarlo en
+        // silencio y dejar datos inconsistentes.
+        const usoEnRecetas = await verificarUsoEnRecetas(id);
+
+        let mensajeConfirmacion = "¿Desea eliminar este producto?";
+
+        if (usoEnRecetas.enUso) {
+
+            mensajeConfirmacion =
+                `Este producto está usado en ${usoEnRecetas.detalle}. ` +
+                `Si lo elimina, esas recetas quedarán inconsistentes y la ` +
+                `producción de ese/esos productos podría fallar. ` +
+                `¿Desea eliminarlo de todas formas?`;
+
+        }
+
+        if (!confirm(mensajeConfirmacion)) return;
 
         try {
 
@@ -255,12 +398,12 @@ function initInventario() {
 
             await cargarProductos();
 
-            showMsg("Producto eliminado correctamente.");
+            showMsg("Producto eliminado correctamente.", "success");
 
         } catch (error) {
 
             console.error(error);
-            showMsg("Error al eliminar el producto.");
+            showMsg("Error al eliminar el producto.", "error");
 
         }
 
@@ -284,12 +427,15 @@ function initInventario() {
         e.preventDefault();
 
         const codigo = document.getElementById("stockCodigo").value.trim();
-        const cantidadAumentar = Number(document.getElementById("stockCantidad").value);
+        const cantidadInput = document.getElementById("stockCantidad").value;
+        const cantidadAumentar = Number(cantidadInput);
 
-        if (!codigo || cantidadAumentar <= 0) {
-            showMsg("Ingrese un código y una cantidad válida.");
+        if (!codigo || cantidadInput === "" || !Number.isInteger(cantidadAumentar) || cantidadAumentar <= 0) {
+            showMsg("Ingrese un código y una cantidad entera válida (mayor a 0).", "warning");
             return;
         }
+
+        const restaurarBoton = setBtnLoading(btnStockSubmit, "Aumentando...");
 
         try {
 
@@ -317,7 +463,7 @@ function initInventario() {
             }
 
             if (!idEncontrado) {
-                showMsg("No se encontró ningún producto con ese código.");
+                showMsg("No se encontró ningún producto con ese código.", "warning");
                 return;
             }
 
@@ -331,7 +477,7 @@ function initInventario() {
                 "PUT"
             );
 
-            showMsg("Stock aumentado correctamente.");
+            showMsg("Stock aumentado correctamente.", "success");
 
             stockForm.reset();
 
@@ -340,16 +486,14 @@ function initInventario() {
         } catch (error) {
 
             console.error(error);
-            showMsg("Error al aumentar el stock.");
+            showMsg("Error al aumentar el stock.", "error");
+
+        } finally {
+
+            restaurarBoton();
 
         }
 
     }
-
-function showMsg(mensaje) {
-
-    alert(mensaje);
-
-}
 
 }

@@ -15,6 +15,7 @@ function initProduccion() {
     const productionTableBody = document.getElementById("productionTableBody");
     const formulaTableBody = document.getElementById("formulaTableBody");
     const productionSummary = document.getElementById("productionSummary");
+    const btnProductionSubmit = document.getElementById("btnProductionSubmit");
 
     cargarProductos();
     cargarHistorial();
@@ -51,6 +52,10 @@ function initProduccion() {
 
                 const producto = productos[key];
 
+                // Solo los productos marcados como "producto_terminado"
+                // se pueden fabricar.
+                if (producto.tipo !== "producto_terminado") continue;
+
                 const option = document.createElement("option");
 
                 option.value = key;
@@ -63,34 +68,39 @@ function initProduccion() {
         } catch (error) {
 
             console.error(error);
-            showMsg("Error al cargar los productos.");
+            showMsg("Error al cargar los productos.", "error");
 
         }
 
     }
 
 
+    // Calcula cuál sería el siguiente código de producción consecutivo,
+    // basándose en el máximo código existente en el historial.
+    async function calcularSiguienteCodigo() {
+
+        const response = await httpClient(
+            `${URL_BASE}produccion.json`,
+            null,
+            "GET"
+        );
+
+        const producciones = await response.json();
+
+        if (!producciones) return 1;
+
+        const codigosExistentes = Object.values(producciones)
+            .map((produccion) => Number(produccion.codigo) || 0);
+
+        return Math.max(...codigosExistentes) + 1;
+
+    }
+
     async function generarCodigo() {
 
         try {
 
-            const response = await httpClient(
-                `${URL_BASE}produccion.json`,
-                null,
-                "GET"
-            );
-
-            const producciones = await response.json();
-
-            let codigo = 1;
-
-            if (producciones) {
-
-                codigo = Object.keys(producciones).length + 1;
-
-            }
-
-            productionCode.value = codigo;
+            productionCode.value = await calcularSiguienteCodigo();
 
         } catch (error) {
 
@@ -151,11 +161,7 @@ function initProduccion() {
 
     } catch (error) {
         console.error(error);
-        if (typeof showMsg === "function") {
-            showMsg("Error al cargar la fórmula.");
-        } else {
-            alert("Error al cargar la fórmula.");
-        }
+        showMsg("Error al cargar la fórmula.", "error");
     }
 }
 
@@ -164,17 +170,20 @@ function initProduccion() {
         e.preventDefault();
 
         const idProducto = productionProduct.value;
-        const cantidadFabricar = Number(productionQuantity.value);
+        const cantidadInput = productionQuantity.value;
+        const cantidadFabricar = Number(cantidadInput);
 
         if (idProducto === "") {
-            showMsg("Seleccione un producto.");
+            showMsg("Seleccione un producto.", "warning");
             return;
         }
 
-        if (cantidadFabricar <= 0) {
-            showMsg("Ingrese una cantidad válida.");
+        if (cantidadInput === "" || !Number.isInteger(cantidadFabricar) || cantidadFabricar <= 0) {
+            showMsg("Ingrese una cantidad entera válida (mayor a 0).", "warning");
             return;
         }
+
+        const restaurarBoton = setBtnLoading(btnProductionSubmit, "Fabricando...");
 
         try {
 
@@ -187,7 +196,7 @@ function initProduccion() {
             const producto = await responseProducto.json();
 
             if (!producto) {
-                showMsg("El producto no existe.");
+                showMsg("El producto no existe.", "warning");
                 return;
             }
 
@@ -200,7 +209,7 @@ function initProduccion() {
             const receta = await responseReceta.json();
 
             if (!receta || !receta.materiales || receta.materiales.length === 0) {
-                showMsg("Este producto no tiene fórmula registrada.");
+                showMsg("Este producto no tiene fórmula registrada.", "warning");
                 return;
             }
 
@@ -235,7 +244,7 @@ function initProduccion() {
 
             if (!stockSuficiente) {
 
-                showMsg("No hay suficiente materia prima para fabricar.");
+                showMsg("No hay suficiente materia prima para fabricar.", "warning");
 
                 return;
 
@@ -274,7 +283,9 @@ function initProduccion() {
 
             );
 
-            guardarProduccion(
+            await guardarProduccion(
+
+                idProducto,
 
                 producto.nombre,
 
@@ -288,29 +299,78 @@ function initProduccion() {
 
             console.error(error);
 
-            showMsg("Error al realizar la producción.");
+            showMsg("Error al realizar la producción.", "error");
+
+        } finally {
+
+            restaurarBoton();
 
         }
 
     }
 
-        async function guardarProduccion(nombreProducto, cantidadFabricada, receta) {
+        async function guardarProduccion(idProducto, nombreProducto, cantidadFabricada, receta) {
 
         try {
 
-            const produccion = {
-                codigo: Number(productionCode.value),
-                producto: nombreProducto,
-                cantidad: cantidadFabricada,
-                receta: receta,
-                fecha: new Date().toLocaleString("es-CO")
-            };
+            // El inventario ya se descontó/incrementó en este punto. Para
+            // evitar que dos fabricaciones casi simultáneas obtengan el
+            // mismo código consecutivo (Firebase REST no ofrece bloqueo ni
+            // transacciones aquí), se recalcula el código justo antes de
+            // guardar y, si por alguna razón ya existe ese código en el
+            // historial, se reintenta unas pocas veces con el siguiente.
+            let codigo = await calcularSiguienteCodigo();
+            let intentos = 0;
+            let guardadoOk = false;
+            let produccion = null;
 
-            await httpClient(
-                `${URL_BASE}produccion.json`,
-                produccion,
-                "POST"
-            );
+            while (!guardadoOk && intentos < 5) {
+
+                produccion = {
+                    codigo: codigo,
+                    producto: nombreProducto,
+                    productoId: idProducto,
+                    cantidad: cantidadFabricada,
+                    receta: receta,
+                    fecha: new Date().toLocaleString("es-CO")
+                };
+
+                const responseVerif = await httpClient(
+                    `${URL_BASE}produccion.json`,
+                    null,
+                    "GET"
+                );
+
+                const produccionesActuales = await responseVerif.json();
+
+                const codigoOcupado = produccionesActuales
+                    ? Object.values(produccionesActuales).some(
+                          (p) => Number(p.codigo) === codigo
+                      )
+                    : false;
+
+                if (codigoOcupado) {
+
+                    codigo += 1;
+                    intentos += 1;
+                    continue;
+
+                }
+
+                await httpClient(
+                    `${URL_BASE}produccion.json`,
+                    produccion,
+                    "POST"
+                );
+
+                guardadoOk = true;
+
+            }
+
+            if (!guardadoOk) {
+                showMsg("No se pudo generar un código único de producción, intente de nuevo.", "error");
+                return;
+            }
 
             productionSummary.innerHTML = `
                 <h4>Producción realizada correctamente</h4>
@@ -346,7 +406,7 @@ function initProduccion() {
 
             });
 
-            showMsg("Producción registrada correctamente.");
+            showMsg("Producción registrada correctamente.", "success");
 
             productionForm.reset();
 
@@ -366,7 +426,7 @@ function initProduccion() {
 
             console.error(error);
 
-            showMsg("Error al guardar la producción.");
+            showMsg("Error al guardar la producción.", "error");
 
         }
 
@@ -436,7 +496,7 @@ function initProduccion() {
 
             console.error(error);
 
-            showMsg("Error al cargar el historial.");
+            showMsg("Error al cargar el historial.", "error");
 
         }
 
@@ -444,9 +504,87 @@ function initProduccion() {
 
     async function eliminarProduccion(id) {
 
-        if (!confirm("¿Desea eliminar esta producción?")) return;
+        // Eliminar el historial NO revierte por sí solo el inventario, ya
+        // que fue una operación real. Se le pregunta al usuario si además
+        // de eliminar el registro desea devolver la materia prima usada y
+        // restar el producto terminado que se fabricó, para dejar el
+        // inventario como estaba antes de esa producción.
+        const revertir = confirm(
+            "¿Desea eliminar este registro de producción?\n\n" +
+            "Presione ACEPTAR para eliminar el registro Y devolver el " +
+            "inventario a como estaba antes de esta producción " +
+            "(se restará el producto fabricado y se devolverá la materia prima usada).\n\n" +
+            "Presione CANCELAR para no eliminar nada."
+        );
+
+        if (!revertir) return;
 
         try {
+
+            const responseProduccion = await httpClient(
+                `${URL_BASE}produccion/${id}.json`,
+                null,
+                "GET"
+            );
+
+            const produccion = await responseProduccion.json();
+
+            if (produccion && produccion.receta && produccion.receta.materiales) {
+
+                // Devolver la materia prima utilizada.
+                for (const materia of produccion.receta.materiales) {
+
+                    const responseMateria = await httpClient(
+                        `${URL_BASE}productos/${materia.id}.json`,
+                        null,
+                        "GET"
+                    );
+
+                    const productoMateria = await responseMateria.json();
+
+                    if (productoMateria) {
+
+                        productoMateria.cantidad += materia.cantidad * produccion.cantidad;
+
+                        await httpClient(
+                            `${URL_BASE}productos/${materia.id}.json`,
+                            productoMateria,
+                            "PUT"
+                        );
+
+                    }
+
+                }
+
+                // Restar el producto terminado que se había fabricado.
+                if (produccion.productoId) {
+
+                    const responseTerminado = await httpClient(
+                        `${URL_BASE}productos/${produccion.productoId}.json`,
+                        null,
+                        "GET"
+                    );
+
+                    const productoTerminado = await responseTerminado.json();
+
+                    if (productoTerminado) {
+
+                        productoTerminado.cantidad = Math.max(
+                            0,
+                            productoTerminado.cantidad - produccion.cantidad
+                        );
+
+                        await httpClient(
+                            `${URL_BASE}productos/${produccion.productoId}.json`,
+                            productoTerminado,
+                            "PUT"
+                        );
+
+                    }
+
+                }
+
+            }
 
             await httpClient(
                 `${URL_BASE}produccion/${id}.json`,
@@ -456,21 +594,15 @@ function initProduccion() {
 
             await cargarHistorial();
 
-            showMsg("Producción eliminada correctamente.");
+            showMsg("Producción eliminada e inventario revertido correctamente.", "success");
 
         } catch (error) {
 
             console.error(error);
 
-            showMsg("Error al eliminar la producción.");
+            showMsg("Error al eliminar la producción.", "error");
 
         }
-
-    }
-
-    function showMsg(mensaje) {
-
-        alert(mensaje);
 
     }
 

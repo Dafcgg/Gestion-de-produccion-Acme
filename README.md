@@ -1,15 +1,17 @@
 # Gestión de Producción - ACME
 
-## 🔑 Credenciales de acceso
+---
+
+# 🔑 Credenciales de acceso
 
 Para ingresar al sistema utilice las siguientes credenciales de prueba:
 
 | Campo | Valor |
-|-------|-------|
-| Número de identificación | **1** |
-| Contraseña | **1234** |
+|---|---|
+| Número de identificación | 1 |
+| Contraseña | 1234 |
 
-> **Nota:** Estas credenciales fueron creadas para facilitar el acceso y la evaluación del proyecto.
+> Nota: Estas credenciales fueron creadas para facilitar el acceso y la evaluación del proyecto.
 
 ---
 
@@ -73,7 +75,7 @@ Desarrollar una aplicación web que permita gestionar de forma eficiente el proc
 │
 ├── js/
 │   ├── api.js                 (URL base de Firebase y cliente HTTP compartido)
-│   ├── auth-usuarios.js       
+│   ├── auth-usuarios.js       (login y CRUD de usuarios)
 │   ├── inventario.js
 │   ├── produccion.js
 │   └── receta.js
@@ -95,7 +97,7 @@ Desarrollar una aplicación web que permita gestionar de forma eficiente el proc
 
 ---
 
-#  Web Components
+# 🧩 Web Components
 
 Para favorecer la reutilización de código y evitar duplicar la barra de navegación y los buscadores en cada página, se desarrollaron los siguientes Custom Elements:
 
@@ -190,9 +192,12 @@ Permite controlar el inventario de materias primas y productos terminados.
 
 - Código
 - Nombre
+- **Tipo** (Materia Prima / Producto Terminado)
 - Proveedor
 - Cantidad disponible
 - Precio
+
+> El campo **Tipo** permite que, en el módulo de Recetas, el selector de "Producto Terminado" solo muestre productos marcados como tal, y el selector de "Materia Prima" solo muestre productos marcados como materia prima. Esto evita mezclar ambos conceptos y que un producto termine siendo su propia materia prima.
 
 ---
 

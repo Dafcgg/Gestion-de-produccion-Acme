@@ -1,3 +1,15 @@
+// Si el usuario llega a esta página con "atrás" y el navegador la restaura
+// desde caché (bfcache), se limpia el formulario para no dejar visibles
+// la identificación ni la contraseña que se hayan escrito antes.
+window.addEventListener("pageshow", () => {
+
+    const loginForm = document.getElementById("loginForm");
+
+    if (loginForm) {
+        loginForm.reset();
+    }
+
+});
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -58,7 +70,8 @@ function initLogin() {
             }
 
             if (acceso) {
-                window.location.href = "usuarios.html";
+                sessionStorage.setItem("sesionActiva", "true");
+                window.location.replace("usuarios.html");
             } else {
                 mostrarErrorLogin("Identificación o contraseña incorrecta.");
             }
@@ -113,14 +126,25 @@ function initUsuarios() {
             !password ||
             !confirmPassword
         ){
-            alert("Complete todos los campos.");
+            showMsg("Complete todos los campos.", "warning");
+            return;
+        }
+
+        // La identificación ahora es un campo de texto con patrón numérico
+        // (ver usuarios.html), así que se valida aquí que solo contenga
+        // dígitos, evitando notación científica o ceros recortados que
+        // permitía el type="number" original.
+        if(!/^\d+$/.test(identificacion)){
+            showMsg("La identificación debe contener solo números.", "warning");
             return;
         }
 
         if(password !== confirmPassword){
-            alert("Las contraseñas no coinciden.");
+            showMsg("Las contraseñas no coinciden.", "warning");
             return;
         }
+
+        const restaurarBoton = setBtnLoading(btnUserSubmit, "Guardando...");
 
         try{
 
@@ -128,7 +152,7 @@ function initUsuarios() {
             const usuarios = await response.json();
 
             if(existeUsuarioDuplicado(usuarios,id,identificacion,nombre)){
-                alert("Ya existe un usuario con esa identificación o nombre.");
+                showMsg("Ya existe un usuario con esa identificación o nombre.", "warning");
                 return;
             }
 
@@ -148,7 +172,7 @@ function initUsuarios() {
 
                 await httpClient(`${URL_BASE}usuarios/${data.name}.json`,usuario,"PUT");
 
-                alert("Usuario registrado correctamente.");
+                showMsg("Usuario registrado correctamente.", "success");
 
             }else{
 
@@ -156,7 +180,7 @@ function initUsuarios() {
 
                 await httpClient(`${URL_BASE}usuarios/${id}.json`,usuario,"PUT");
 
-                alert("Usuario actualizado correctamente.");
+                showMsg("Usuario actualizado correctamente.", "success");
 
             }
 
@@ -166,7 +190,11 @@ function initUsuarios() {
         }catch(error){
 
             console.error(error);
-            alert("Error al guardar el usuario.");
+            showMsg("Error al guardar el usuario.", "error");
+
+        }finally{
+
+            restaurarBoton();
 
         }
 
@@ -246,6 +274,8 @@ function initUsuarios() {
 
             console.error(error);
 
+            usersTableBody.innerHTML="<tr><td colspan='4'>Error al cargar usuarios.</td></tr>";
+
         }
 
     }
@@ -276,6 +306,7 @@ function initUsuarios() {
         }catch(error){
 
             console.error(error);
+            showMsg("Error al cargar el usuario.", "error");
 
         }
 
@@ -295,13 +326,13 @@ async function eliminarUsuario(id){
 
         cargarUsuarios();
 
-        alert("Usuario eliminado correctamente.");
+        showMsg("Usuario eliminado correctamente.", "success");
 
     }catch(error){
 
         console.error(error);
 
-        alert("Error al eliminar el usuario.");
+        showMsg("Error al eliminar el usuario.", "error");
 
     }
 

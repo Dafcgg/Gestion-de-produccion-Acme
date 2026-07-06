@@ -1,7 +1,15 @@
-
 class AppNavbar extends HTMLElement {
 
     connectedCallback() {
+
+        // Si no hay una sesión activa (no se inició sesión, o ya se cerró),
+        // se redirige al login. Esto evita que, al presionar "atrás" o
+        // escribir la URL directamente, se pueda ver una página protegida
+        // sin haber ingresado las credenciales.
+        if (sessionStorage.getItem("sesionActiva") !== "true") {
+            window.location.replace("login.html");
+            return;
+        }
 
         const brand = this.getAttribute("brand") || "Gestión de Producción";
         const active = this.getAttribute("active") || "";
@@ -42,9 +50,11 @@ class AppNavbar extends HTMLElement {
 
             if (confirm("¿Desea cerrar sesión?")) {
 
+                sessionStorage.removeItem("sesionActiva");
+
                 document.dispatchEvent(new CustomEvent("app-logout"));
 
-                window.location.href = "login.html";
+                window.location.replace("login.html");
 
             }
 

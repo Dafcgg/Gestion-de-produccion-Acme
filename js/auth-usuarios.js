@@ -144,6 +144,13 @@ function initUsuarios() {
             return;
         }
 
+        // La contraseña no puede contener espacios (ni al inicio, en medio,
+        // ni al final), para evitar errores de digitación difíciles de notar.
+        if(/\s/.test(password)){
+            showMsg("La contraseña no puede contener espacios.", "warning");
+            return;
+        }
+
         const restaurarBoton = setBtnLoading(btnUserSubmit, "Guardando...");
 
         try{

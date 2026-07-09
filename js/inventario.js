@@ -26,6 +26,25 @@ function initInventario() {
         stockForm.addEventListener("submit", aumentarStock);
     }
 
+    const productTipoSelect = document.getElementById("productTipo");
+    const productCantidadInput = document.getElementById("productCantidad");
+
+    if (productTipoSelect && productCantidadInput) {
+
+        productTipoSelect.addEventListener("change", () => {
+
+            if (productTipoSelect.value === "producto_terminado") {
+                productCantidadInput.min = "0";
+                productCantidadInput.placeholder = "Ej. 0 (aún sin fabricar)";
+            } else {
+                productCantidadInput.min = "1";
+                productCantidadInput.placeholder = "Ej. 100";
+            }
+
+        });
+
+    }
+
     // Traduce el valor interno del tipo a una etiqueta legible para la tabla
     function etiquetaTipo(tipo) {
 
@@ -56,11 +75,20 @@ function initInventario() {
             return;
         }
 
-        // La cantidad debe ser un número entero mayor a 0 (no se acepta
-        // stock inicial en 0, ni fracciones de unidad).
-        if (!Number.isInteger(cantidad) || cantidad <= 0) {
-            showMsg("La cantidad debe ser un número entero mayor a 0.", "warning");
+        // La cantidad debe ser un número entero. Un producto terminado
+        // puede iniciar en stock 0 (aún no se ha fabricado nada), pero una
+        // materia prima debe registrarse con al menos 1 unidad disponible.
+        const cantidadMinima = tipo === "producto_terminado" ? 0 : 1;
+
+        if (!Number.isInteger(cantidad) || cantidad < cantidadMinima) {
+
+            const mensaje = tipo === "producto_terminado"
+                ? "La cantidad debe ser un número entero mayor o igual a 0."
+                : "La cantidad debe ser un número entero mayor o igual a 1 para una materia prima.";
+
+            showMsg(mensaje, "warning");
             return;
+
         }
 
         // El precio debe ser mayor a 0. Un precio de $0 casi siempre es

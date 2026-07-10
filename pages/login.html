@@ -50,10 +50,6 @@
     </div>
 
     <script>
-        // Si el usuario llega a esta página usando el botón "Atrás" del
-        // navegador, esta se puede restaurar desde el caché (bfcache) con
-        // los campos aún llenos. Al detectar esto, se limpia el formulario
-        // y se fuerza a verificar sesión de nuevo.
         window.addEventListener("pageshow", (event) => {
             if (event.persisted) {
                 document.getElementById("loginForm").reset();

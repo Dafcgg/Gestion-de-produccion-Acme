@@ -78,7 +78,8 @@ Desarrollar una aplicación web que permita gestionar de forma eficiente el proc
 │   ├── auth-usuarios.js       (login, sesión y CRUD de usuarios)
 │   ├── inventario.js          (incluye fecha de registro y filtro por año/mes)
 │   ├── produccion.js
-│   └── receta.js
+│   ├── receta.js
+│   └── reporte.js             (reporte de materia prima utilizada por año/mes)
 │
 ├── web-components/
 │   ├── app-navbar.js          (<app-navbar> - barra de navegación, guardia de sesión y logout)
@@ -89,7 +90,8 @@ Desarrollar una aplicación web que permita gestionar de forma eficiente el proc
 │   ├── usuarios.html
 │   ├── inventario.html
 │   ├── produccion.html
-│   └── receta.html
+│   ├── receta.html
+│   └── reporte.html
 │
 ├── README.md
 
@@ -223,6 +225,22 @@ Ejemplo:
 
 ---
 
+# 📈 Módulo Reporte (Materia Prima Utilizada por Mes)
+
+Permite consultar cuánta materia prima se consumió durante un período específico.
+
+### Funcionalidades
+
+- Seleccionar un **año** y un **mes** mediante selectores.
+- Consultar automáticamente el historial de producción (`produccion`) y filtrar los registros cuya fecha (`fechaISO`) corresponda al año y mes elegidos.
+- Sumar, por cada materia prima, la cantidad total consumida en ese período a partir de la receta utilizada en cada producción registrada.
+- Mostrar el **código**, **nombre** y **cantidad consumida** de cada materia prima.
+- Informar cuando no existe consumo registrado en el período seleccionado.
+
+> El año de registro de cada producción se toma del campo `fechaISO`, que se guarda automáticamente al registrar un proceso productivo en el módulo de Producción (ver `js/produccion.js`, función `guardarProduccion`). El selector de años se completa dinámicamente a partir de los años presentes en el historial de producción.
+
+---
+
 # 🏭 Módulo Producción
 
 Permite registrar procesos de fabricación.
@@ -330,6 +348,16 @@ produccion
 ✔ Mostrar resumen de producción
 
 ✔ Buscar en el historial
+
+---
+
+## Reporte
+
+✔ Seleccionar año y mes
+
+✔ Consultar materia prima consumida en el período
+
+✔ Mostrar código, nombre y cantidad consumida
 
 ---
 

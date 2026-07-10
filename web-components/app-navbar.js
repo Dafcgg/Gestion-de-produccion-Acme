@@ -14,7 +14,8 @@ class AppNavbar extends HTMLElement {
             { key: "usuarios", href: "usuarios.html", label: "Usuarios", clase: "btn-secondary" },
             { key: "inventario", href: "inventario.html", label: "Inventario", clase: "btn-secondary" },
             { key: "receta", href: "receta.html", label: "Receta", clase: "btn-production" },
-            { key: "produccion", href: "produccion.html", label: "Producción", clase: "btn-production" }
+            { key: "produccion", href: "produccion.html", label: "Producción", clase: "btn-production" },
+            { key: "reporte", href: "reporte.html", label: "Reporte", clase: "btn-white" }
         ];
 
         const enlacesHtml = links

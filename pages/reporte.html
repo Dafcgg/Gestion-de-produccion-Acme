@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte | Gestión de Producción ACME</title>
+
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="../js/api.js" defer></script>
+    <script src="../web-components/app-navbar.js" defer></script>
+    <script src="../js/reporte.js" defer></script>
+
+    <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/combo-chart--v1.png">
+</head>
+
+<body id="reporte-body">
+
+    <app-navbar brand="Reporte de Materia Prima" active="reporte"></app-navbar>
+
+    <div class="container">
+
+        <div class="card">
+
+            <h3>
+                Materia Prima Utilizada por Período
+            </h3>
+
+            <form id="reportForm">
+
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <label for="reportYear">
+                            Año
+                        </label>
+
+                        <select id="reportYear" required>
+
+                            <option value="">
+                                Seleccione un año
+                            </option>
+
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reportMonth">
+                            Mes
+                        </label>
+
+                        <select id="reportMonth" required>
+
+                            <option value="">
+                                Seleccione un mes
+                            </option>
+
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="form-actions">
+
+                    <button
+                        type="submit"
+                        id="btnReportSubmit"
+                        class="btn btn-primary">
+
+                        Generar Reporte
+
+                    </button>
+
+                </div>
+
+            </form>
+
+            <p id="reportSummary" class="report-summary hidden"></p>
+
+        </div>
+
+        <div class="card table-card">
+
+            <h3>
+                Materia Prima Consumida
+            </h3>
+
+            <div class="table-responsive">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Código</th>
+                            <th>Materia Prima</th>
+                            <th>Cantidad Consumida</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="reportTableBody">
+
+                        <tr>
+
+                            <td colspan="3">
+                                Seleccione un año y un mes, y presione "Generar Reporte".
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

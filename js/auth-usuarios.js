@@ -12,8 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (document.getElementById("loginForm")) initLogin();
     if (document.getElementById("userForm")) initUsuarios();
-    if (document.getElementById("productoForm")) initInventario();
-    if (document.getElementById("formulaForm")) initProduccion();
 
 });
 

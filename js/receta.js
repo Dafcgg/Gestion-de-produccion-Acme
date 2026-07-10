@@ -23,9 +23,6 @@ function initRecetas() {
 
     let materiales = [];
 
-    // Se cargan los productos primero y solo cuando terminan se cargan
-    // las recetas, para evitar que "Editar" intente seleccionar un producto
-    // en un <select> que todavía no tiene opciones (race condition).
     iniciar();
 
     async function iniciar() {
@@ -36,8 +33,6 @@ function initRecetas() {
     btnAddMaterial.addEventListener("click", agregarMaterial);
     recipeForm.addEventListener("submit", guardarReceta);
     btnCancelRecipe.addEventListener("click", resetRecipeForm);
-
-
 
     async function cargarProductos() {
 
@@ -69,8 +64,6 @@ function initRecetas() {
 
                 const producto = productos[key];
 
-                // Solo los productos marcados como "producto_terminado"
-                // aparecen como producto a fabricar.
                 if (producto.tipo === "producto_terminado") {
 
                     const optionProducto = document.createElement("option");
@@ -80,8 +73,6 @@ function initRecetas() {
 
                 }
 
-                // Solo los productos marcados como "materia_prima"
-                // aparecen como materia prima seleccionable.
                 if (producto.tipo === "materia_prima") {
 
                     const optionMaterial = document.createElement("option");
@@ -252,9 +243,6 @@ function initRecetas() {
 
             };
 
-            // La receta siempre se guarda usando el id del producto terminado
-            // como clave (recetas/{idProducto}), tanto al crear como al editar,
-            // así que no existe una diferencia real entre ambos casos.
             await httpClient(
 
                 `${URL_BASE}recetas/${idProducto}.json`,
@@ -392,9 +380,6 @@ function initRecetas() {
 
             recipeProduct.value = receta.productoId;
 
-            // Si el producto ya no existe en el select (fue eliminado o
-            // cambió de tipo desde Inventario), se avisa al usuario en
-            // lugar de dejarlo con un select vacío sin explicación.
             if (recipeProduct.value !== receta.productoId) {
 
                 showMsg(

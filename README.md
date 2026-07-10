@@ -74,14 +74,14 @@ Desarrollar una aplicación web que permita gestionar de forma eficiente el proc
 │   └── styles.css
 │
 ├── js/
-│   ├── api.js                 (URL base de Firebase y cliente HTTP compartido)
-│   ├── auth-usuarios.js       (login y CRUD de usuarios)
-│   ├── inventario.js
+│   ├── api.js                 (URL base de Firebase, cliente HTTP, toasts y loading compartidos)
+│   ├── auth-usuarios.js       (login, sesión y CRUD de usuarios)
+│   ├── inventario.js          (incluye fecha de registro y filtro por año/mes)
 │   ├── produccion.js
 │   └── receta.js
 │
 ├── web-components/
-│   ├── app-navbar.js          (<app-navbar> - barra de navegación y logout)
+│   ├── app-navbar.js          (<app-navbar> - barra de navegación, guardia de sesión y logout)
 │   └── app-search-box.js      (<app-search-box> - buscador/filtro reutilizable)
 │
 ├── pages/
@@ -239,6 +239,16 @@ Permite registrar procesos de fabricación.
 - Mostrar un resumen por producto con la cantidad fabricada y las materias primas utilizadas.
 - Consultar y buscar el historial de producción (`<app-search-box>`).
 - Eliminar registros del historial.
+
+---
+
+# 📊 Búsqueda de Materia Prima por Fecha de Registro
+
+No es una página aparte, está integrado en el buscador de texto que ya existía en **Inventario** (`<app-search-box>`):
+
+- Cada producto guarda su **fecha de registro** (se asigna una sola vez, al crearlo; no cambia al editarlo).
+- La tabla de inventario muestra la columna **Fecha de Registro**, escrita con el mes en palabras (ej. "09 de julio de 2026").
+- Como el buscador ya filtra por cualquier texto visible en la fila, basta con escribir el **nombre del mes** (ej. `julio`) o el **año** (ej. `2026`) en el mismo buscador para ver solo la materia prima registrada en ese periodo — sin necesidad de un filtro aparte.
 
 ---
 

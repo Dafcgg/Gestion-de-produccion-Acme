@@ -1,6 +1,3 @@
-// Si el usuario llega a esta página con "atrás" y el navegador la restaura
-// desde caché (bfcache), se limpia el formulario para no dejar visibles
-// la identificación ni la contraseña que se hayan escrito antes.
 window.addEventListener("pageshow", () => {
 
     const loginForm = document.getElementById("loginForm");
@@ -19,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (document.getElementById("formulaForm")) initProduccion();
 
 });
-
 
 function initLogin() {
 
@@ -93,8 +89,6 @@ function initLogin() {
 
 }
 
-
-
 function initUsuarios() {
 
     const userForm = document.getElementById("userForm");
@@ -130,10 +124,6 @@ function initUsuarios() {
             return;
         }
 
-        // La identificación ahora es un campo de texto con patrón numérico
-        // (ver usuarios.html), así que se valida aquí que solo contenga
-        // dígitos, evitando notación científica o ceros recortados que
-        // permitía el type="number" original.
         if(!/^\d+$/.test(identificacion)){
             showMsg("La identificación debe contener solo números.", "warning");
             return;
@@ -144,8 +134,6 @@ function initUsuarios() {
             return;
         }
 
-        // La contraseña no puede contener espacios (ni al inicio, en medio,
-        // ni al final), para evitar errores de digitación difíciles de notar.
         if(/\s/.test(password)){
             showMsg("La contraseña no puede contener espacios.", "warning");
             return;

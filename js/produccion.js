@@ -27,7 +27,6 @@ function initProduccion() {
 
     productionForm.addEventListener("submit", fabricarProducto);
 
-
     async function cargarProductos() {
 
         try {
@@ -52,8 +51,6 @@ function initProduccion() {
 
                 const producto = productos[key];
 
-                // Solo los productos marcados como "producto_terminado"
-                // se pueden fabricar.
                 if (producto.tipo !== "producto_terminado") continue;
 
                 const option = document.createElement("option");
@@ -74,9 +71,6 @@ function initProduccion() {
 
     }
 
-
-    // Calcula cuál sería el siguiente código de producción consecutivo,
-    // basándose en el máximo código existente en el historial.
     async function calcularSiguienteCodigo() {
 
         const response = await httpClient(
@@ -111,7 +105,6 @@ function initProduccion() {
 
     }
 
-
    async function cargarFormula(idProducto) {
     formulaTableBody.innerHTML = "";
 
@@ -135,7 +128,6 @@ function initProduccion() {
 
         const receta = await response.json();
 
-        // Validar si la receta existe o si tiene el listado de materiales
         if (!receta || !receta.materiales) {
             formulaTableBody.innerHTML = `
                 <tr>
@@ -147,7 +139,6 @@ function initProduccion() {
             return;
         }
 
-        // CORRECCIÓN: Iterar sobre el array correcto de materiales
         receta.materiales.forEach(materia => {
             const fila = document.createElement("tr");
 
@@ -313,12 +304,6 @@ function initProduccion() {
 
         try {
 
-            // El inventario ya se descontó/incrementó en este punto. Para
-            // evitar que dos fabricaciones casi simultáneas obtengan el
-            // mismo código consecutivo (Firebase REST no ofrece bloqueo ni
-            // transacciones aquí), se recalcula el código justo antes de
-            // guardar y, si por alguna razón ya existe ese código en el
-            // historial, se reintenta unas pocas veces con el siguiente.
             let codigo = await calcularSiguienteCodigo();
             let intentos = 0;
             let guardadoOk = false;
@@ -332,7 +317,8 @@ function initProduccion() {
                     productoId: idProducto,
                     cantidad: cantidadFabricada,
                     receta: receta,
-                    fecha: new Date().toLocaleString("es-CO")
+                    fecha: new Date().toLocaleString("es-CO"),
+                    fechaISO: new Date().toISOString()
                 };
 
                 const responseVerif = await httpClient(
@@ -504,11 +490,6 @@ function initProduccion() {
 
     async function eliminarProduccion(id) {
 
-        // Eliminar el historial NO revierte por sí solo el inventario, ya
-        // que fue una operación real. Se le pregunta al usuario si además
-        // de eliminar el registro desea devolver la materia prima usada y
-        // restar el producto terminado que se fabricó, para dejar el
-        // inventario como estaba antes de esa producción.
         const revertir = confirm(
             "¿Desea eliminar este registro de producción?\n\n" +
             "Presione ACEPTAR para eliminar el registro Y devolver el " +
@@ -531,7 +512,6 @@ function initProduccion() {
 
             if (produccion && produccion.receta && produccion.receta.materiales) {
 
-                // Devolver la materia prima utilizada.
                 for (const materia of produccion.receta.materiales) {
 
                     const responseMateria = await httpClient(
@@ -556,7 +536,6 @@ function initProduccion() {
 
                 }
 
-                // Restar el producto terminado que se había fabricado.
                 if (produccion.productoId) {
 
                     const responseTerminado = await httpClient(

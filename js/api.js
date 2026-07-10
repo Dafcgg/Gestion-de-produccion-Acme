@@ -17,11 +17,6 @@ async function httpClient(url, payload, method) {
 
 }
 
-/* ============================================================
-   Sistema de notificaciones tipo "toast"
-   Reemplaza el uso de alert() nativo del navegador para no
-   bloquear la interfaz y dar una experiencia más moderna.
-   ============================================================ */
 
 function getToastContainer() {
 
@@ -94,11 +89,7 @@ function showMsg(mensaje, tipo = "info") {
 
 }
 
-/* ============================================================
-   Helper para mostrar estado de "cargando" en botones y evitar
-   doble clic / doble envío mientras se espera la respuesta de
-   Firebase.
-   ============================================================ */
+
 
 function setBtnLoading(boton, textoCargando = "Guardando...") {
 

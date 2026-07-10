@@ -45,7 +45,6 @@ function initInventario() {
 
     }
 
-    // Traduce el valor interno del tipo a una etiqueta legible para la tabla
     function etiquetaTipo(tipo) {
 
         if (tipo === "materia_prima") return "Materia Prima";
@@ -75,9 +74,6 @@ function initInventario() {
             return;
         }
 
-        // La cantidad debe ser un número entero. Un producto terminado
-        // puede iniciar en stock 0 (aún no se ha fabricado nada), pero una
-        // materia prima debe registrarse con al menos 1 unidad disponible.
         const cantidadMinima = tipo === "producto_terminado" ? 0 : 1;
 
         if (!Number.isInteger(cantidad) || cantidad < cantidadMinima) {
@@ -91,8 +87,6 @@ function initInventario() {
 
         }
 
-        // El precio debe ser mayor a 0. Un precio de $0 casi siempre es
-        // un error de captura, así que se avisa en vez de guardarlo silenciosamente.
         if (!(precio > 0)) {
             showMsg("El precio debe ser mayor a 0.", "warning");
             return;
@@ -136,10 +130,6 @@ function initInventario() {
                 return;
             }
 
-            // Si se está editando un producto ya existente y se le cambia
-            // el tipo (Materia Prima <-> Producto Terminado), se avisa si
-            // ese producto está siendo usado en alguna receta, ya que el
-            // cambio puede dejar recetas inconsistentes.
             if (id !== "" && productos && productos[id] && productos[id].tipo !== tipo) {
 
                 const usoEnRecetas = await verificarUsoEnRecetas(id);
@@ -167,7 +157,8 @@ function initInventario() {
                 tipo,
                 proveedor,
                 cantidad,
-                precio
+                precio,
+                fechaRegistro: new Date().toISOString()
             };
 
             if (id === "") {
@@ -208,9 +199,6 @@ function initInventario() {
 
     }
 
-    // Revisa si un producto (por su id) está usado como producto terminado
-    // en alguna receta, o como materia prima dentro de los materiales de
-    // cualquier receta. Devuelve un resumen legible para mostrar al usuario.
     async function verificarUsoEnRecetas(idProducto) {
 
         try {
@@ -256,8 +244,6 @@ function initInventario() {
         } catch (error) {
 
             console.error(error);
-            // Si falla la verificación, se deja continuar sin bloquear al
-            // usuario, pero sin poder advertirle.
             return { enUso: false, detalle: "" };
 
         }
@@ -267,7 +253,7 @@ function initInventario() {
         async function cargarProductos() {
 
         productsTableBody.innerHTML =
-            "<tr><td colspan='7'>Cargando productos...</td></tr>";
+            "<tr><td colspan='8'>Cargando productos...</td></tr>";
 
         try {
 
@@ -284,7 +270,7 @@ function initInventario() {
             if (!productos) {
 
                 productsTableBody.innerHTML =
-                    "<tr><td colspan='7'>No hay productos registrados.</td></tr>";
+                    "<tr><td colspan='8'>No hay productos registrados.</td></tr>";
 
                 return;
             }
@@ -306,6 +292,7 @@ function initInventario() {
                     <td>${producto.proveedor}</td>
                     <td>${producto.cantidad}</td>
                     <td>$${Number(producto.precio).toLocaleString("es-CO")}</td>
+                    <td>${formatearFecha(producto.fechaRegistro)}</td>
                     <td>
                         <button
                             class="btn btn-warning btn-sm btnEditar"
@@ -346,9 +333,33 @@ function initInventario() {
             console.error(error);
 
             productsTableBody.innerHTML =
-                "<tr><td colspan='7'>Error al cargar productos.</td></tr>";
+                "<tr><td colspan='8'>Error al cargar productos.</td></tr>";
 
         }
+
+    }
+
+    function formatearFecha(fechaISO) {
+
+        if (!fechaISO) return "Sin fecha";
+
+        const fecha = new Date(fechaISO);
+
+        if (isNaN(fecha.getTime())) return "Sin fecha";
+
+        const fechaTexto = fecha.toLocaleDateString("es-CO", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric"
+        });
+
+        const horaTexto = fecha.toLocaleTimeString("es-CO", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+        });
+
+        return `${fechaTexto}, ${horaTexto}`;
 
     }
 
@@ -392,10 +403,6 @@ function initInventario() {
 
     async function eliminarProducto(id) {
 
-        // Antes de eliminar, se verifica si el producto está usado en
-        // alguna receta (como producto terminado o como materia prima).
-        // Si lo está, se advierte al usuario en vez de eliminarlo en
-        // silencio y dejar datos inconsistentes.
         const usoEnRecetas = await verificarUsoEnRecetas(id);
 
         let mensajeConfirmacion = "¿Desea eliminar este producto?";
